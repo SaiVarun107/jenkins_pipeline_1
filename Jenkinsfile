@@ -9,7 +9,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh 'docker build -t myapp:latest .'
+        bat 'docker build -t myapp:latest .'
       }
     }
 
@@ -20,10 +20,10 @@ pipeline {
           usernameVariable: 'DOCKER_USER',
           passwordVariable: 'DOCKER_PASS'
         )]) {
-          sh '''
-            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-            docker tag myapp:latest $DOCKER_USER/myapp:latest
-            docker push $DOCKER_USER/myapp:latest
+          bat '''
+            docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+            docker tag myapp:latest %DOCKER_USER%/myapp:latest
+            docker push %DOCKER_USER%/myapp:latest
           '''
         }
       }
@@ -31,8 +31,8 @@ pipeline {
 
     stage('Deploy to Kubernetes') {
       steps {
-        sh '''
-          kubectl apply -f k8s/
+        bat '''
+          kubectl apply -f k8s
           kubectl rollout restart deployment myapp
         '''
       }
